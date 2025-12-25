@@ -1,0 +1,46 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+
+permissions:
+  id-token: write   # Required for OIDC
+  contents: read    # Required to checkout code
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Configure AWS credentials using OIDC
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::368222779225:role/aws-gh-role
+        role-session-name: GitHubActions-${{ github.run_id }}
+        aws-region: ${{ env.AWS_REGION }}
+    
+    - name: Verify AWS Identity
+      run: |
+        echo "🔍 Verificando identidade AWS..."
+        aws sts get-caller-identity
+        echo "✅ Autenticação AWS bem-sucedida!"
+    
+    # Adicione seus steps de deploy aqui
+    - name: Deploy Application
+      run: |
+        echo "🚀 Iniciando deploy..."
+        # Adicione seus comandos de deploy aqui
+        # Exemplos:
+        # aws s3 sync ./build s3://meu-bucket
+        # aws ecs update-service --cluster meu-cluster --service meu-service
+        echo "✅ Deploy concluído!"
